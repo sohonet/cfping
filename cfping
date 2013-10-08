@@ -26,8 +26,8 @@ write_times=[]
 read_times=[]
 delete_times=[]
 total_times=[]
-graphite_metric_root_path=''
-CARBON_SERVER = '0.0.0.0'
+graphite_metric_root_path='cfping.'
+CARBON_SERVER_IP = None
 CARBON_PORT = 2003
 
 def sizeof_fmt(num):
@@ -49,8 +49,7 @@ def timer(time_list=[], stats=False):
     elapsed_time = end_time - start_time
 
     print '%10.3f' % (elapsed_time),
-    if stats:
-        time_list.append(elapsed_time)
+    time_list.append(elapsed_time)
 
     
 def ping(auth_url, username, key, container=None, use_service_net=False, 
@@ -104,7 +103,10 @@ def ping(auth_url, username, key, container=None, use_service_net=False,
 def ping_forever(authurl, username, key, container=None, use_service_net=False, 
                  ping_interval=DEFAULT_PING_INTERVAL,
                  repetitions=DEFAULT_PING_REPETITIONS,
-                 machine_readable=False, stats=False):
+                 machine_readable=False, stats=False,
+                 carbon_server_ip=CARBON_SERVER_IP,
+                 carbon_port=CARBON_PORT,
+                 metric_path_root=graphite_metric_root_path):
     """
     Continually ping the Rackspace cloudfiles or Openstack swift service, 
     sleeping for `ping_interval` seconds between requests.
@@ -128,6 +130,35 @@ def ping_forever(authurl, username, key, container=None, use_service_net=False,
             ping(authurl, username, key, container=container, 
                  use_service_net=use_service_net,
                  stats=stats)
+            if carbon_server_ip:
+                try:
+                    timestamp=int(time.time())
+                    message=''
+                    lines=[
+                        metric_path_root+'connect %s %d' % (connect_times[-1], 
+                                                         timestamp),
+                        metric_path_root+'container %s %d' % (container_times[-1], 
+                                                           timestamp),
+                        metric_path_root+'create %s %d' % (create_times[-1], 
+                                                        timestamp),
+                        metric_path_root+'write %s %d' % (write_times[-1], 
+                                                       timestamp),
+                        metric_path_root+'read %s %d' %  (read_times[-1], 
+                                                       timestamp),
+                        metric_path_root+'delete %s %d' % (delete_times[-1], 
+                                                        timestamp),
+                        metric_path_root+'total %s %d' % (total_times[-1], 
+                                                       timestamp)
+                    ]
+                    message = '\n'.join(lines) + '\n'
+                    sock = socket.socket()
+                    sock.connect((carbon_server_ip, carbon_port))
+                    sock.sendall(message)
+                    sock.close()
+                except:
+                    print 'Failed to send %s %s (%s)' % (carbon_server_ip, 
+                                                    carbon_port,
+                                                    message)
             request_count += 1
             if repetitions is not None and request_count > repetitions:
                 break
@@ -207,12 +238,15 @@ if __name__ == '__main__':
     parser.add_argument('-d', '--data',  
                         help='Output statistics for the tests, min, max, and average (mean)',
                         action='store_true')
-    parser.add_argument('-g', '--graphite-root-path', 
-                        help='The root of the graphite path (default: CF_GRAPHITE_ROOT)')
-    parser.add_argument('--carbon-server', 
-                        help='IP address of the carbon server (default: CF_CARBON_PORT)')
+    parser.add_argument('--graphite-root-metric-path', 
+                        help='The root of the graphite metric path (default: '
+                             'CF_GRAPHITE_ROOT %s)' % graphite_metric_root_path )
+    parser.add_argument('--carbon-server-ip', 
+                        help='IPv4 address of the carbon server (default: CF_CARBON_IP)',
+                        default=CARBON_SERVER_IP)
     parser.add_argument('--carbon-port', type=int,
-                        help='Carbon server port (default: CF_CARBON_PORT)')
+                        help='Carbon server port (default: CF_CARBON_PORT %s)' % CARBON_PORT,
+                        default=CARBON_PORT)
     args = parser.parse_args()
 
     username = args.username or os.getenv('CFUSER')
@@ -229,9 +263,20 @@ if __name__ == '__main__':
 
     if args.test_data_size != sys.getsizeof(TEST_DATA):
         TEST_DATA = str(os.urandom(args.test_data_size - sys.getsizeof('')))
-
+    # graphite vars
+    metric_path_root = args.graphite_root_metric_path
+    carbon_server_ip = args.carbon_server_ip
+    carbon_port = args.carbon_port
+    if metric_path_root and not metric_path_root.endswith('.'):
+        metric_path_root +'.'
+        
+    
     ping_forever(authurl,username, key, container=args.container,
                  use_service_net=args.use_service_net,
                  ping_interval=args.ping_interval,
                  repetitions=args.ping_repetitions,
-                 machine_readable=args.machinereadable, stats=args.data)
+                 machine_readable=args.machinereadable, 
+                 stats=args.data,
+                 carbon_server_ip=carbon_server_ip,
+                 carbon_port=carbon_port,
+                 metric_path_root=metric_path_root )

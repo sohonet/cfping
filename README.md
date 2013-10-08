@@ -23,34 +23,46 @@ Usage
 -----
 
     usage: cfping [-h] [-u USERNAME] [-k KEY] [-a AUTHURL] [-c CONTAINER] [-s]
-                  [-i PING_INTERVAL] [-r PING_REPETITIONS] [-t TEST_DATA_SIZE]
+            [-i PING_INTERVAL] [-r PING_REPETITIONS] [-t TEST_DATA_SIZE]
+            [-m] [-d]
+            [--graphite-root-metric-path GRAPHITE_ROOT_METRIC_PATH]
+            [--carbon-server-ip CARBON_SERVER_IP]
+            [--carbon-port CARBON_PORT]
 
-    Test the performance and availability of the Rackspace cloudfiles or Openstack swift service.
+            Test the performance and availability of the Rackspace cloudfiles or Openstack swift service.
 
-    optional arguments:
-    -h, --help            show this help message and exit
-    -u USERNAME, --username USERNAME
-                          Storage service username (default: CFUSER)
-    -k KEY, --key KEY     Storage service API key (default: CFKEY)
-    -a AUTHURL, --authurl AUTHURL
-                          Storage service auth URL (default:
-                          https://auth.api.rackspacecloud.com/v1.0)
-    -c CONTAINER, --container CONTAINER
-                          Use the specified container (default: use the first
-                          container [index 0])
-    -s, --service-net     Use the Rackspace service network (default: use public
-                          network)
-    -i PING_INTERVAL, --interval PING_INTERVAL
-                          Seconds to wait between ping requests (default: 1
-                          seconds)
-    -r PING_REPETITIONS, --repetitions PING_REPETITIONS
-                          Number of repetitions (default: infinite)
-    -t TEST_DATA_SIZE, --test-data-size TEST_DATA_SIZE
-                          Test data size in Bytes (default: 81 Bytes)
-    -m, --machinereadable
-                          Output results with no headers
-    -d, --data            Output statistics for the tests, min, max, and average
-                          (mean)
+            optional arguments:
+            -h, --help            show this help message and exit
+            -u USERNAME, --username USERNAME
+                      Storage service username (default: CFUSER)
+            -k KEY, --key KEY     Storage service API key (default: CFKEY)
+            -a AUTHURL, --authurl AUTHURL
+                      Storage service auth URL (default:
+                      https://auth.api.rackspacecloud.com/v1.0)
+            -c CONTAINER, --container CONTAINER
+                      Use the specified container (default: use the first
+                      container [index 0])
+            -s, --service-net     Use the Rackspace service network (default: use public
+                      network)
+            -i PING_INTERVAL, --interval PING_INTERVAL
+                      Seconds to wait between ping requests (default: 1
+                      seconds)
+            -r PING_REPETITIONS, --repetitions PING_REPETITIONS
+                      Number of repetitions (default: infinite) 
+            -t TEST_DATA_SIZE, --test-data-size TEST_DATA_SIZE
+                      Test data size in Bytes (default: 81 Bytes)
+            -m, --machinereadable
+                      Output results with no headers
+            -d, --data            Output statistics for the tests, min, max, and average
+                      (mean)
+            --graphite-root-metric-path GRAPHITE_ROOT_METRIC_PATH
+                      The root of the graphite metric path (default:
+                      CF_GRAPHITE_ROOT cfping.)
+            --carbon-server-ip CARBON_SERVER_IP
+                      IPv4 address of the carbon server (default:
+                      CF_CARBON_IP)
+            --carbon-port CARBON_PORT
+                      Carbon server port (default: CF_CARBON_PORT 2003)
 
 
 Environment
