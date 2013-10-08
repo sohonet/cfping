@@ -73,6 +73,9 @@ Environment
 * `CFUSER`, the account username. The `-u` option, if provided, takes precedence.
 * `CFKEY`, the account key. The `-k` option, if provided, takes precedence.
 * `CFAUTHURL`, the authentication endpoint. The `-a` option, if provided, takes precedence.
+* `CARBON_PORT`, the port that graphite carbon is listening on.
+* `CARBON_SERVER_IP`, the IPv4 address of the server.
+* `CF_GRAPHITE_ROOT`, the root of the metric path, cfping.metrics.read
 
 Installation
 ------------
