@@ -11,6 +11,7 @@ import os
 import time
 import uuid
 import sys
+import socket
 
 import cloudfiles
 
@@ -25,6 +26,9 @@ write_times=[]
 read_times=[]
 delete_times=[]
 total_times=[]
+graphite_metric_root_path=''
+CARBON_SERVER = '0.0.0.0'
+CARBON_PORT = 2003
 
 def sizeof_fmt(num):
     for x in ['bytes','KB','MB','GB','TB','PB']:
@@ -203,6 +207,12 @@ if __name__ == '__main__':
     parser.add_argument('-d', '--data',  
                         help='Output statistics for the tests, min, max, and average (mean)',
                         action='store_true')
+    parser.add_argument('-g', '--graphite-root-path', 
+                        help='The root of the graphite path (default: CF_GRAPHITE_ROOT)')
+    parser.add_argument('--carbon-server', 
+                        help='IP address of the carbon server (default: CF_CARBON_PORT)')
+    parser.add_argument('--carbon-port', type=int,
+                        help='Carbon server port (default: CF_CARBON_PORT)')
     args = parser.parse_args()
 
     username = args.username or os.getenv('CFUSER')
