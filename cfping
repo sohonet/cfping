@@ -12,6 +12,7 @@ import time
 import uuid
 import sys
 import socket
+import syslog
 
 import cloudfiles
 
@@ -99,6 +100,38 @@ def ping(auth_url, username, key, container=None, use_service_net=False,
 
     print
 
+def send_graphite_stats(carbon_server_ip,carbon_port,metric_path_root):
+    try:
+        timestamp=int(time.time())
+        message=''
+        lines=[
+            metric_path_root+'connect %3.3f %d' % (connect_times[-1], 
+                                             timestamp),
+            metric_path_root+'container %3.3f %d' % (container_times[-1], 
+                                               timestamp),
+            metric_path_root+'create %3.3f %d' % (create_times[-1], 
+                                            timestamp),
+            metric_path_root+'write %3.3f %d' % (write_times[-1], 
+                                           timestamp),
+            metric_path_root+'read %3.3f %d' %  (read_times[-1], 
+                                           timestamp),
+            metric_path_root+'delete %3.3f %d' % (delete_times[-1], 
+                                            timestamp),
+            metric_path_root+'total %3.3f %d' % (total_times[-1], 
+                                           timestamp)
+        ]
+        message = '\n'.join(lines) + '\n'
+        sock = socket.socket()
+        sock.connect((carbon_server_ip, carbon_port))
+        sock.sendall(message)
+        sock.close()
+    except Exception as e:
+        print 'Failed to send %s %s (%s) %s' % (carbon_server_ip, 
+                                                carbon_port,
+                                                message, e)
+        syslog.syslog('Failed to send %s %s (%s) %s' % (carbon_server_ip, 
+                      carbon_port, message, e))
+
 
 def ping_forever(authurl, username, key, container=None, use_service_net=False, 
                  ping_interval=DEFAULT_PING_INTERVAL,
@@ -130,35 +163,9 @@ def ping_forever(authurl, username, key, container=None, use_service_net=False,
             ping(authurl, username, key, container=container, 
                  use_service_net=use_service_net,
                  stats=stats)
-            if carbon_server_ip:
-                try:
-                    timestamp=int(time.time())
-                    message=''
-                    lines=[
-                        metric_path_root+'connect %s %d' % (connect_times[-1], 
-                                                         timestamp),
-                        metric_path_root+'container %s %d' % (container_times[-1], 
-                                                           timestamp),
-                        metric_path_root+'create %s %d' % (create_times[-1], 
-                                                        timestamp),
-                        metric_path_root+'write %s %d' % (write_times[-1], 
-                                                       timestamp),
-                        metric_path_root+'read %s %d' %  (read_times[-1], 
-                                                       timestamp),
-                        metric_path_root+'delete %s %d' % (delete_times[-1], 
-                                                        timestamp),
-                        metric_path_root+'total %s %d' % (total_times[-1], 
-                                                       timestamp)
-                    ]
-                    message = '\n'.join(lines) + '\n'
-                    sock = socket.socket()
-                    sock.connect((carbon_server_ip, carbon_port))
-                    sock.sendall(message)
-                    sock.close()
-                except:
-                    print 'Failed to send %s %s (%s)' % (carbon_server_ip, 
-                                                    carbon_port,
-                                                    message)
+            if carbon_server_ip: 
+                send_graphite_stats(carbon_server_ip, carbon_port, 
+                                    metric_path_root)   
             request_count += 1
             if repetitions is not None and request_count > repetitions:
                 break
