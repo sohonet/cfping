@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name = "cfping",
-    version = "0.3.0",
+    version = "0.3.1",
     description = "Test the performance and availability of the Rackspace cloudfiles or Openstack swift service.",
     author = "Clay McClure",
     author_email = "clay@daemons.net",
