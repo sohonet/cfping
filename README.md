@@ -53,7 +53,7 @@ Usage
                       seconds)
             -r PING_REPETITIONS, --repetitions PING_REPETITIONS
                       Number of repetitions (default: infinite) 
-            -t TEST_DATA_SIZE, --test-data-size TEST_DATA_SIZE
+            -T TEST_DATA_SIZE, --test-data-size TEST_DATA_SIZE
                       Test data size in Bytes (default: 81 Bytes)
             -m, --machinereadable
                       Output results with no headers
