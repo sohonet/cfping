@@ -131,7 +131,7 @@ def send_graphite_stats(carbon_server_ip,carbon_port,metric_path_root):
         message = '\n'.join(lines) + '\n'
         sock = socket.socket()
         sock.connect((carbon_server_ip, carbon_port))
-        sock.sendall(message)
+        sock.sendall(message.encode('utf-8'))
         sock.close()
     except Exception as e:
         print('Failed to send %s %s (%s) %s' % (carbon_server_ip,
