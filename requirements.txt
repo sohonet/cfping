@@ -1,1 +1,2 @@
-python-cloudfiles==1.7.11
+python-keystoneclient>=4.2.0
+python-swiftclient>=3.11.0
