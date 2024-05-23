@@ -96,6 +96,7 @@ def ping(auth_url, username, key, tenant, auth_version, container=None, stats=Fa
             with timer(delete_times, stats):
                 delete_object(url, token, container=container, name=obj_name,
                               http_conn=(purl, conn))
+            conn.close()
 
         # Contents will be a byte-string
         if contents.decode() != TEST_DATA:
